@@ -35,6 +35,7 @@ const mocks = vi.hoisted(() => ({
   pick: vi.fn(),
   handlers: new Map<string, (event: { sender: unknown }, args: unknown) => unknown>()
 }))
+vi.mock('../ipc/browser-passwords-ipc', () => ({ registerBrowserPasswordsHandlers: vi.fn() }))
 vi.mock('electron', () => ({
   app: { getPath: () => mocks.root },
   BrowserWindow: { fromWebContents: () => null },
@@ -191,7 +192,7 @@ beforeEach(() => {
     }
   })
   setTrustedBrowserRendererWebContentsId(91)
-  registerBrowserHandlers()
+  registerBrowserHandlers({ getSettings: vi.fn() })
 })
 afterEach(() => {
   replaceRuntimeEnvironmentRevisions([])
