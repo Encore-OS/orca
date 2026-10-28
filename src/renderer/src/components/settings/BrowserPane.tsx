@@ -22,7 +22,7 @@ import { BrowserUserAgentSetting } from './BrowserUserAgentSetting'
 import { BrowserSitePermissionsSetting } from './BrowserSitePermissionsSetting'
 import { SettingsSubsectionHeader } from './SettingsFormControls'
 import { BrowserSessionCookiesSection } from './BrowserSessionCookiesSection'
-import { BrowserPasswordManagerSetting } from './BrowserPasswordManagerSetting'
+import { BrowserPasswordsSection } from './BrowserPasswordsSection'
 import { getBrowserPasswordsSearchEntry } from './browser-passwords-copy'
 import { BrowserNewProfileDialog } from './BrowserNewProfileDialog'
 import { BrowserExtensionsSection } from './BrowserExtensionsSection'
@@ -179,6 +179,9 @@ export function BrowserPane({
   const activeBrowserSessionProfileId =
     useAppStore((s) => getDefaultBrowserProfileForHost(s, selectedBrowserSessionHostId)) ??
     'default'
+  const activeBrowserSessionProfileLabel =
+    browserSessionProfiles.find((profile) => profile.id === activeBrowserSessionProfileId)?.label ??
+    activeBrowserSessionProfileId
   useEffect(() => {
     const requestedHostId = browserSessionHostIdOverride ?? settingsFocusedHostId
     if (selectedBrowserSessionHostId !== requestedHostId) {
@@ -343,26 +346,24 @@ export function BrowserPane({
         />
       ) : null}
 
+      {/* The vault lives on this computer only, so it follows the local host's profiles. */}
+      {showPasswords &&
+      settings.experimentalBrowserPasswords === true &&
+      selectedBrowserSessionHostId === LOCAL_EXECUTION_HOST_ID ? (
+        <BrowserPasswordsSection
+          browserProfileId={activeBrowserSessionProfileId}
+          profileLabel={activeBrowserSessionProfileLabel}
+          settings={settings}
+          updateSettings={updateSettings}
+        />
+      ) : null}
+
       {/* Why local only: release 1 runs extensions in this computer's browser profiles. */}
       {settings.experimentalBrowserExtensions === true &&
       selectedBrowserSessionHostId === LOCAL_EXECUTION_HOST_ID ? (
         <BrowserExtensionsSection
           profileId={activeBrowserSessionProfileId}
-          profileLabel={
-            browserSessionProfiles.find((profile) => profile.id === activeBrowserSessionProfileId)
-              ?.label ?? activeBrowserSessionProfileId
-          }
-        />
-      ) : null}
-
-      {/* The vault lives on this computer only, so it follows the local host's profiles. */}
-      {showPasswords &&
-      settings.experimentalBrowserPasswords === true &&
-      selectedBrowserSessionHostId === LOCAL_EXECUTION_HOST_ID ? (
-        <BrowserPasswordManagerSetting
-          settings={settings}
-          updateSettings={updateSettings}
-          profiles={browserSessionProfiles}
+          profileLabel={activeBrowserSessionProfileLabel}
         />
       ) : null}
 
